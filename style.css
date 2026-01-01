@@ -319,22 +319,33 @@ header h1 {
     }
 
     .result-table {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
+        /* Slightly smaller font to fit numbers */
     }
 
     .result-table td,
     .result-table th {
-        padding: 0.75rem 0.25rem;
-        /* Significantly reduced padding */
+        padding: 0.5rem 0.25rem;
+        /* Tighter padding */
     }
 
-    /* Prevent squashing of numbers */
+    /* Force specific widths or behaviors for columns if needed */
     .result-table td:nth-child(2),
+    .result-table td:nth-child(3),
     .result-table td:nth-child(4) {
+        /* Numbers columns */
         white-space: nowrap;
+        text-align: right;
     }
 
-    /* Ensure the cost column aligns right properly */
+    /* Ensure first column (Name) doesn't get squashed to zero but allows wrapping if needed */
+    .result-table td:first-child {
+        min-width: 60px;
+        white-space: normal;
+        padding-left: 0.25rem;
+        /* Ensure start padding */
+    }
+
     .text-right {
         text-align: right;
     }

@@ -8,6 +8,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultSection = document.getElementById('result-section');
     const copyImageBtn = document.getElementById('copy-image-btn');
     const captureTarget = document.getElementById('capture-target');
+    const selectYear = document.getElementById('select-year');
+    const selectQuarter = document.getElementById('select-quarter');
+
+    // Init Date Selectors
+    const currentYear = new Date().getFullYear();
+    for (let i = 0; i < 3; i++) {
+        const year = currentYear - i;
+        const option = document.createElement('option');
+        option.value = year;
+        option.innerText = year;
+        selectYear.appendChild(option);
+    }
 
     // State
     const state = {
@@ -28,6 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
         state.neighborKwh = parseFloat(e.target.value) || 0;
         checkReady();
     });
+
+    selectYear.addEventListener('change', () => { if (state.files.user) calculateAndRender() });
+    selectQuarter.addEventListener('change', () => { if (state.files.user) calculateAndRender() });
 
     fileUser.addEventListener('change', (e) => handleFileUpload(e));
     calcBtn.addEventListener('click', calculateAndRender);
@@ -193,17 +208,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Determine most recent quarter from User Data
-        const allDates = dataUser.map(d => d.date);
-        allDates.sort((a, b) => b - a); // Descending
-
-        if (allDates.length === 0) return;
-
-        const latestDate = allDates[0];
-        const latestQuarter = getQuarter(latestDate);
+        // Get Selection
+        const selectedYear = selectYear.value;
+        const selectedQuarter = selectQuarter.value; // "Q1", "Q2"...
+        const targetToken = `${selectedYear} ${selectedQuarter}`;
 
         // Filter User Data for that Quarter
-        const filteredUser = dataUser.filter(d => getQuarter(d.date) === latestQuarter);
+        const filteredUser = dataUser.filter(d => getQuarter(d.date) === targetToken);
 
         // Sum User kWh
         const sumUser = filteredUser.reduce((acc, curr) => acc + curr.kwh, 0);

@@ -6,8 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const labelUser = document.getElementById('name-user');
     const calcBtn = document.getElementById('calc-btn');
     const resultSection = document.getElementById('result-section');
-    const copyBtn = document.getElementById('copy-btn');
-    const messageText = document.getElementById('message-text');
+    const copyImageBtn = document.getElementById('copy-image-btn');
+    const captureTarget = document.getElementById('capture-target');
 
     // State
     const state = {
@@ -32,15 +32,34 @@ document.addEventListener('DOMContentLoaded', () => {
     fileUser.addEventListener('change', (e) => handleFileUpload(e));
     calcBtn.addEventListener('click', calculateAndRender);
 
-    copyBtn.addEventListener('click', () => {
-        messageText.select();
-        document.execCommand('copy');
+    copyImageBtn.addEventListener('click', async () => {
+        const originalText = copyImageBtn.innerText;
+        copyImageBtn.innerText = 'Wird erstellt...';
 
-        const originalText = copyBtn.innerText;
-        copyBtn.innerText = 'Kopiert!';
-        setTimeout(() => {
-            copyBtn.innerText = originalText;
-        }, 2000);
+        try {
+            const canvas = await html2canvas(captureTarget, {
+                scale: 2, // Better quality
+                backgroundColor: null
+            });
+
+            canvas.toBlob(blob => {
+                const item = new ClipboardItem({ 'image/png': blob });
+                navigator.clipboard.write([item]).then(() => {
+                    copyImageBtn.innerText = 'Bild kopiert! ✅';
+                    setTimeout(() => {
+                        copyImageBtn.innerText = originalText;
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Copy failed', err);
+                    alert('Bild konnte nicht automatisch kopiert werden. Bitte Screenshot machen.');
+                    copyImageBtn.innerText = originalText;
+                });
+            });
+        } catch (err) {
+            console.error(err);
+            copyImageBtn.innerText = originalText;
+            alert('Fehler beim Erstellen des Bildes.');
+        }
     });
 
     function handleFileUpload(event) {
@@ -171,27 +190,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render Results
         document.getElementById('quarter-display').innerText = latestQuarter;
 
-        document.getElementById('total-kwh').innerText = totalKwh.toFixed(0);
+        document.getElementById('total-kwh-result').innerText = totalKwh.toFixed(0);
         document.getElementById('total-cost').innerText = `CHF ${totalBill.toFixed(2)}`;
 
-        document.getElementById('user-kwh').innerText = sumUser.toFixed(0);
+        document.getElementById('user-kwh-result').innerText = sumUser.toFixed(0);
         document.getElementById('user-percent').innerText = `${percentUser.toFixed(1)}%`;
         document.getElementById('user-cost').innerText = `CHF ${costUser.toFixed(2)}`;
 
-        document.getElementById('neighbor-kwh').innerText = sumNeighbor.toFixed(0);
+        document.getElementById('neighbor-kwh-result').innerText = sumNeighbor.toFixed(0);
         document.getElementById('neighbor-percent').innerText = `${percentNeighbor.toFixed(1)}%`;
         document.getElementById('neighbor-cost').innerText = `CHF ${costNeighbor.toFixed(2)}`;
 
-        // Generate Message
-        const message = `Hoi Nachbar, hier die Stromabrechnung für ${latestQuarter}.
-Dein Anteil für ${sumNeighbor.toFixed(0)} kWh (${percentNeighbor.toFixed(1)}%) beträgt CHF ${costNeighbor.toFixed(2)}.
 
-Total Ladestationen: ${totalKwh.toFixed(0)} kWh
-Total Rechnung: CHF ${totalBill.toFixed(2)}
-
-Danke und Gruss!`;
-
-        messageText.value = message;
 
         // Show Results
         resultSection.classList.remove('hidden');

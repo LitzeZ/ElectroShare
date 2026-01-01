@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 
 <body>
@@ -49,7 +50,7 @@
         </section>
 
         <section id="result-section" class="hidden">
-            <div class="card result-card">
+            <div class="card result-card" id="capture-target">
                 <div class="result-header">
                     <h2>Kostenaufteilung <span id="quarter-display"></span></h2>
                 </div>
@@ -67,19 +68,19 @@
                         <tbody>
                             <tr class="row-total-main">
                                 <td><strong>Total Ladestationen</strong></td>
-                                <td id="total-kwh">0</td>
+                                <td id="total-kwh-result">0</td>
                                 <td>100.0%</td>
                                 <td class="text-right" id="total-cost">CHF 0.00</td>
                             </tr>
                             <tr class="row-user">
                                 <td><span class="dot user-dot"></span> Ich</td>
-                                <td id="user-kwh">0</td>
+                                <td id="user-kwh-result">0</td>
                                 <td id="user-percent">0%</td>
                                 <td class="text-right highlight-user" id="user-cost">CHF 0.00</td>
                             </tr>
                             <tr class="row-neighbor">
                                 <td><span class="dot neighbor-dot"></span> Nachbar</td>
-                                <td id="neighbor-kwh">0</td>
+                                <td id="neighbor-kwh-result">0</td>
                                 <td id="neighbor-percent">0%</td>
                                 <td class="text-right highlight-neighbor" id="neighbor-cost">CHF 0.00</td>
                             </tr>
@@ -88,14 +89,10 @@
                 </div>
             </div>
 
-            <div class="card message-card">
-                <h3>Nachricht für Nachbar</h3>
-                <div class="message-box">
-                    <textarea id="message-text" readonly></textarea>
-                    <button id="copy-btn" class="secondary-btn">
-                        <span class="copy-text">Kopieren</span>
-                    </button>
-                </div>
+            <div class="action-buttons" style="margin-top: 1rem;">
+                <button id="copy-image-btn" class="secondary-btn">
+                    Tabelle als Bild kopieren 📸
+                </button>
             </div>
         </section>
 

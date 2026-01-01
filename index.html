@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Charge Splitter</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <main class="container">
+        <header>
+            <h1>ElectroShare</h1>
+            <p class="subtitle">Stromkosten einfach teilen.</p>
+        </header>
+
+        <section class="card input-section">
+            <div class="input-group">
+                <label for="bill-amount">Total Stromrechnung (CHF)</label>
+                <div class="currency-input">
+                    <span>CHF</span>
+                    <input type="number" id="bill-amount" placeholder="0.00" step="0.05">
+                </div>
+            </div>
+
+            <div class="file-drop-zone" id="drop-zone-user">
+                <input type="file" id="file-user" accept=".csv" hidden>
+                <label for="file-user" class="file-label">
+                    <span class="icon">🚗</span>
+                    <span class="text">Mein Auto (.csv)</span>
+                    <span class="file-name" id="name-user">Keine Datei gewählt</span>
+                </label>
+            </div>
+
+            <div class="input-group">
+                <label for="neighbor-kwh">Nachbar Verbrauch (kWh)</label>
+                <div class="currency-input">
+                    <span>⚡</span>
+                    <input type="number" id="neighbor-kwh" placeholder="0" step="1">
+                </div>
+            </div>
+
+            <button id="calc-btn" class="primary-btn" disabled>Berechnen</button>
+        </section>
+
+        <section id="result-section" class="hidden">
+            <div class="card result-card">
+                <div class="result-header">
+                    <h2>Kostenaufteilung <span id="quarter-display"></span></h2>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="result-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>kWh</th>
+                                <th>%</th>
+                                <th class="text-right">Betrag</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="row-total-main">
+                                <td><strong>Total Ladestationen</strong></td>
+                                <td id="total-kwh">0</td>
+                                <td>100.0%</td>
+                                <td class="text-right" id="total-cost">CHF 0.00</td>
+                            </tr>
+                            <tr class="row-user">
+                                <td><span class="dot user-dot"></span> Ich</td>
+                                <td id="user-kwh">0</td>
+                                <td id="user-percent">0%</td>
+                                <td class="text-right highlight-user" id="user-cost">CHF 0.00</td>
+                            </tr>
+                            <tr class="row-neighbor">
+                                <td><span class="dot neighbor-dot"></span> Nachbar</td>
+                                <td id="neighbor-kwh">0</td>
+                                <td id="neighbor-percent">0%</td>
+                                <td class="text-right highlight-neighbor" id="neighbor-cost">CHF 0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card message-card">
+                <h3>Nachricht für Nachbar</h3>
+                <div class="message-box">
+                    <textarea id="message-text" readonly></textarea>
+                    <button id="copy-btn" class="secondary-btn">
+                        <span class="copy-text">Kopieren</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

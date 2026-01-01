@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Render Results
-        document.getElementById('quarter-display').innerText = latestQuarter;
+        document.getElementById('quarter-display').innerText = targetToken;
 
         document.getElementById('total-kwh-result').innerText = totalKwh.toFixed(0);
         document.getElementById('total-cost').innerText = `CHF ${totalBill.toFixed(2)}`;

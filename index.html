@@ -29,6 +29,30 @@
                 </div>
             </div>
 
+            <div class="input-group" style="display: flex; gap: 1rem;">
+                <div style="flex: 1;">
+                    <label for="select-year">Jahr</label>
+                    <div class="currency-input">
+                        <select id="select-year"
+                            style="width: 100%; border: none; background: transparent; padding: 1rem 0; font-size: 1.1rem; font-weight: 600; outline: none;">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                </div>
+                <div style="flex: 1;">
+                    <label for="select-quarter">Quartal</label>
+                    <div class="currency-input">
+                        <select id="select-quarter"
+                            style="width: 100%; border: none; background: transparent; padding: 1rem 0; font-size: 1.1rem; font-weight: 600; outline: none;">
+                            <option value="Q1">Q1 (Jan-Mär)</option>
+                            <option value="Q2">Q2 (Apr-Jun)</option>
+                            <option value="Q3">Q3 (Jul-Sep)</option>
+                            <option value="Q4">Q4 (Okt-Dez)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div class="file-drop-zone" id="drop-zone-user">
                 <input type="file" id="file-user" accept=".csv" hidden>
                 <label for="file-user" class="file-label">

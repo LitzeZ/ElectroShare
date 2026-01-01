@@ -33,8 +33,7 @@
                 <div style="flex: 1;">
                     <label for="select-year">Jahr</label>
                     <div class="currency-input">
-                        <select id="select-year"
-                            style="width: 100%; border: none; background: transparent; padding: 1rem 0; font-size: 1.1rem; font-weight: 600; outline: none;">
+                        <select id="select-year" class="modern-select">
                             <!-- Populated by JS -->
                         </select>
                     </div>
@@ -42,8 +41,7 @@
                 <div style="flex: 1;">
                     <label for="select-quarter">Quartal</label>
                     <div class="currency-input">
-                        <select id="select-quarter"
-                            style="width: 100%; border: none; background: transparent; padding: 1rem 0; font-size: 1.1rem; font-weight: 600; outline: none;">
+                        <select id="select-quarter" class="modern-select">
                             <option value="Q1">Q1 (Jan-Mär)</option>
                             <option value="Q2">Q2 (Apr-Jun)</option>
                             <option value="Q3">Q3 (Jul-Sep)</option>
@@ -97,13 +95,13 @@
                                 <td class="text-right" id="total-cost">CHF 0.00</td>
                             </tr>
                             <tr class="row-user">
-                                <td><span class="dot user-dot"></span> Ich</td>
+                                <td><span class="dot user-dot"></span> Lenart</td>
                                 <td id="user-kwh-result">0</td>
                                 <td id="user-percent">0%</td>
                                 <td class="text-right highlight-user" id="user-cost">CHF 0.00</td>
                             </tr>
                             <tr class="row-neighbor">
-                                <td><span class="dot neighbor-dot"></span> Nachbar</td>
+                                <td><span class="dot neighbor-dot"></span> Krieg</td>
                                 <td id="neighbor-kwh-result">0</td>
                                 <td id="neighbor-percent">0%</td>
                                 <td class="text-right highlight-neighbor" id="neighbor-cost">CHF 0.00</td>

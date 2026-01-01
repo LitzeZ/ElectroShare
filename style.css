@@ -313,4 +313,29 @@ header h1 {
     header h1 {
         font-size: 1.75rem;
     }
+
+    .card {
+        padding: 1rem;
+    }
+
+    .result-table {
+        font-size: 0.85rem;
+    }
+
+    .result-table td,
+    .result-table th {
+        padding: 0.75rem 0.25rem;
+        /* Significantly reduced padding */
+    }
+
+    /* Prevent squashing of numbers */
+    .result-table td:nth-child(2),
+    .result-table td:nth-child(4) {
+        white-space: nowrap;
+    }
+
+    /* Ensure the cost column aligns right properly */
+    .text-right {
+        text-align: right;
+    }
 }

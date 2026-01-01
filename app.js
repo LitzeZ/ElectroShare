@@ -38,27 +38,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const canvas = await html2canvas(captureTarget, {
-                scale: 2, // Better quality
-                backgroundColor: null
+                scale: 2,
+                backgroundColor: null,
+                useCORS: true
             });
 
-            canvas.toBlob(blob => {
-                const item = new ClipboardItem({ 'image/png': blob });
-                navigator.clipboard.write([item]).then(() => {
-                    copyImageBtn.innerText = 'Bild kopiert! ✅';
-                    setTimeout(() => {
-                        copyImageBtn.innerText = originalText;
-                    }, 2000);
-                }).catch(err => {
-                    console.error('Copy failed', err);
-                    alert('Bild konnte nicht automatisch kopiert werden. Bitte Screenshot machen.');
+            canvas.toBlob(async blob => {
+                if (!blob) {
+                    alert('Canvas Leer Fehler');
                     copyImageBtn.innerText = originalText;
-                });
+                    return;
+                }
+
+                // Strategy 1: Native Share (Best for Mobile)
+                const file = new File([blob], "stromabrechnung.png", { type: "image/png" });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Stromabrechnung',
+                            text: 'Hier ist die Abrechnung.'
+                        });
+                        copyImageBtn.innerText = 'Geteilt! ✅';
+                        setTimeout(() => copyImageBtn.innerText = originalText, 2000);
+                        return;
+                    } catch (err) {
+                        console.log('Share cancelled/failed', err);
+                        // User might have cancelled, so we stop here or fall through? 
+                        // Usually if cancelled, we don't want to force download.
+                        if (err.name !== 'AbortError') {
+                            // Only fall through if it wasn't a user cancel
+                        } else {
+                            copyImageBtn.innerText = originalText;
+                            return;
+                        }
+                    }
+                }
+
+                // Strategy 2: Clipboard
+                try {
+                    const item = new ClipboardItem({ 'image/png': blob });
+                    await navigator.clipboard.write([item]);
+                    copyImageBtn.innerText = 'Kopiert! ✅';
+                    setTimeout(() => copyImageBtn.innerText = originalText, 2000);
+                    return;
+                } catch (err) {
+                    console.warn('Clipboard failed', err);
+                }
+
+                // Strategy 3: Download Fallback
+                try {
+                    const link = document.createElement('a');
+                    link.download = 'stromabrechnung.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    copyImageBtn.innerText = 'Gespeichert! ⬇️';
+                    setTimeout(() => copyImageBtn.innerText = originalText, 2000);
+                } catch (errDownload) {
+                    console.error('Download failed', errDownload);
+                    alert('Bild konnte leider nicht automatisch exportiert werden. Bitte Screenshot machen.');
+                    copyImageBtn.innerText = originalText;
+                }
             });
+
         } catch (err) {
             console.error(err);
             copyImageBtn.innerText = originalText;
-            alert('Fehler beim Erstellen des Bildes.');
+            alert('Fehler beim Erstellen des Bildes: ' + err.message);
         }
     });
 

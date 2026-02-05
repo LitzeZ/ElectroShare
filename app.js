@@ -21,28 +21,66 @@ document.addEventListener('DOMContentLoaded', () => {
         selectYear.appendChild(option);
     }
 
+    // LocalStorage helpers
+    const STORAGE_KEY = 'electroshare_data';
+
+    function saveState() {
+        const data = {
+            billAmount: state.billAmount,
+            neighborKwh: state.neighborKwh,
+            csvText: state.files.user,
+            csvFileName: state.csvFileName || null,
+            selectedYear: selectYear.value,
+            selectedQuarter: selectQuarter.value
+        };
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        } catch (e) {
+            console.warn('Could not save to localStorage', e);
+        }
+    }
+
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) return JSON.parse(raw);
+        } catch (e) {
+            console.warn('Could not load from localStorage', e);
+        }
+        return null;
+    }
+
     // State
     const state = {
         files: {
             user: null
         },
         neighborKwh: 0,
-        billAmount: 0
+        billAmount: 0,
+        csvFileName: null
     };
 
     // Event Listeners
     billInput.addEventListener('input', (e) => {
         state.billAmount = parseFloat(e.target.value) || 0;
+        saveState();
         checkReady();
     });
 
     neighborInput.addEventListener('input', (e) => {
         state.neighborKwh = parseFloat(e.target.value) || 0;
+        saveState();
         checkReady();
     });
 
-    selectYear.addEventListener('change', () => { if (state.files.user) calculateAndRender() });
-    selectQuarter.addEventListener('change', () => { if (state.files.user) calculateAndRender() });
+    selectYear.addEventListener('change', () => {
+        saveState();
+        if (state.files.user) calculateAndRender();
+    });
+    selectQuarter.addEventListener('change', () => {
+        saveState();
+        if (state.files.user) calculateAndRender();
+    });
 
     fileUser.addEventListener('change', (e) => handleFileUpload(e));
     calcBtn.addEventListener('click', calculateAndRender);
@@ -128,10 +166,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!file) return;
 
         labelUser.innerText = file.name;
+        state.csvFileName = file.name;
 
         const reader = new FileReader();
         reader.onload = function (e) {
             state.files.user = e.target.result;
+            saveState();
             checkReady();
         };
         reader.readAsText(file);
@@ -263,5 +303,30 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show Results
         resultSection.classList.remove('hidden');
         resultSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Restore saved state on load
+    const saved = loadState();
+    if (saved) {
+        if (saved.billAmount) {
+            state.billAmount = saved.billAmount;
+            billInput.value = saved.billAmount;
+        }
+        if (saved.neighborKwh) {
+            state.neighborKwh = saved.neighborKwh;
+            neighborInput.value = saved.neighborKwh;
+        }
+        if (saved.selectedYear) {
+            selectYear.value = saved.selectedYear;
+        }
+        if (saved.selectedQuarter) {
+            selectQuarter.value = saved.selectedQuarter;
+        }
+        if (saved.csvText) {
+            state.files.user = saved.csvText;
+            state.csvFileName = saved.csvFileName;
+            labelUser.innerText = saved.csvFileName || 'Gespeicherte Datei';
+        }
+        checkReady();
     }
 });

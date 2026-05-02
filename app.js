@@ -187,6 +187,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkReady() {
         const ready = state.hasFile && state.neighborKwh > 0 && state.billAmount > 0;
         calcBtn.toggleAttribute('disabled', !ready);
+
+        // Progress check icons
+        document.getElementById('check-bill').classList.toggle('visible', state.billAmount > 0);
+        document.getElementById('check-file').classList.toggle('visible', state.hasFile);
+        document.getElementById('check-neighbor').classList.toggle('visible', state.neighborKwh > 0);
     }
 
     function parseCSV(csvText) {
@@ -285,6 +290,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('neighbor-kwh-result').textContent = sumNeighbor.toFixed(1);
         document.getElementById('neighbor-percent').textContent = `${percentNeighbor.toFixed(1)}%`;
         document.getElementById('neighbor-cost').textContent = `CHF ${costNeighbor.toFixed(2)}`;
+
+        // Payout highlight card
+        document.getElementById('payout-amount').textContent = `CHF ${costNeighbor.toFixed(2)}`;
+
+        // kWh split bar
+        document.getElementById('bar-user').style.width = `${percentUser.toFixed(1)}%`;
+        document.getElementById('bar-label-user').textContent = `${percentUser.toFixed(0)}%`;
+        document.getElementById('bar-label-neighbor').textContent = `${percentNeighbor.toFixed(0)}%`;
 
         // Only scroll into view on first reveal; subsequent recalcs stay in place
         if (resultSection.classList.contains('hidden')) {

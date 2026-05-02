@@ -26,7 +26,10 @@
 
         <section class="card input-section">
             <div class="input-group">
-                <label for="bill-amount">Total Stromrechnung (CHF)</label>
+                <label for="bill-amount">
+                    Total Stromrechnung (CHF)
+                    <span class="check-icon" id="check-bill">✓</span>
+                </label>
                 <div class="currency-input">
                     <span>CHF</span>
                     <input type="number" id="bill-amount" placeholder="0.00" step="0.05">
@@ -59,13 +62,19 @@
                 <input type="file" id="file-user" accept=".csv" hidden>
                 <label for="file-user" class="file-label">
                     <span class="icon">🚗</span>
-                    <span class="text">Mein Auto (.csv)</span>
+                    <span class="text">
+                        Mein Auto (.csv)
+                        <span class="check-icon" id="check-file">✓</span>
+                    </span>
                     <span class="file-name" id="name-user">Keine Datei gewählt</span>
                 </label>
             </div>
 
             <div class="input-group">
-                <label for="neighbor-kwh">Nachbar Verbrauch (kWh)</label>
+                <label for="neighbor-kwh">
+                    Nachbar Verbrauch (kWh)
+                    <span class="check-icon" id="check-neighbor">✓</span>
+                </label>
                 <div class="currency-input">
                     <span>⚡</span>
                     <input type="number" id="neighbor-kwh" placeholder="0" step="1">
@@ -77,6 +86,13 @@
 
         <section id="result-section" class="hidden">
             <div class="card result-card" id="capture-target">
+
+                <!-- Highlight: Nachbar schuldet dir -->
+                <div class="payout-card">
+                    <p class="payout-label">Nachbar schuldet dir</p>
+                    <p class="payout-amount" id="payout-amount">CHF 0.00</p>
+                </div>
+
                 <div class="result-header">
                     <h2>Kostenaufteilung <span id="quarter-display"></span></h2>
                 </div>
@@ -99,13 +115,13 @@
                                 <td class="text-right" id="total-cost">CHF 0.00</td>
                             </tr>
                             <tr class="row-user">
-                                <td><span class="dot user-dot"></span> Lenart</td>
+                                <td><span class="dot user-dot"></span> Ich</td>
                                 <td id="user-kwh-result">0</td>
                                 <td id="user-percent">0%</td>
                                 <td class="text-right highlight-user" id="user-cost">CHF 0.00</td>
                             </tr>
                             <tr class="row-neighbor">
-                                <td><span class="dot neighbor-dot"></span> Krieg</td>
+                                <td><span class="dot neighbor-dot"></span> Nachbar</td>
                                 <td id="neighbor-kwh-result">0</td>
                                 <td id="neighbor-percent">0%</td>
                                 <td class="text-right highlight-neighbor" id="neighbor-cost">CHF 0.00</td>
@@ -113,6 +129,17 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- kWh Split Bar -->
+                <div class="split-bar">
+                    <div class="split-bar-user" id="bar-user"></div>
+                    <div class="split-bar-neighbor" id="bar-neighbor"></div>
+                </div>
+                <div class="split-bar-labels">
+                    <span class="split-label-user">Ich <span id="bar-label-user"></span></span>
+                    <span class="split-label-neighbor"><span id="bar-label-neighbor"></span> Nachbar</span>
+                </div>
+
             </div>
 
             <div class="action-buttons">

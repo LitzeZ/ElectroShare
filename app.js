@@ -306,6 +306,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Version indicator
+    const versionEl = document.getElementById('app-version');
+    if (versionEl) versionEl.textContent = 'v2026-05-02';
+
     // Restore saved state on load
     const saved = loadState();
     if (saved) {

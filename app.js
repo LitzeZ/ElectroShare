@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements
     const billInput = document.getElementById('bill-amount');
     const fileUser = document.getElementById('file-user');
-    const neighborInput = document.getElementById('neighbor-kwh'); // Changed from file input
+    const neighborInput = document.getElementById('neighbor-kwh');
     const labelUser = document.getElementById('name-user');
     const calcBtn = document.getElementById('calc-btn');
     const resultSection = document.getElementById('result-section');
@@ -14,11 +14,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Init Date Selectors
     const currentYear = new Date().getFullYear();
     for (let i = 0; i < 3; i++) {
-        const year = currentYear - i;
         const option = document.createElement('option');
-        option.value = year;
-        option.innerText = year;
+        option.value = currentYear - i;
+        option.textContent = currentYear - i;
         selectYear.appendChild(option);
+    }
+
+    // Detect export capability and set button label accordingly
+    if (navigator.canShare && navigator.canShare({ files: [new File([], 'test.png', { type: 'image/png' })] })) {
+        copyImageBtn.textContent = 'Tabelle teilen 📤';
+    } else if (navigator.clipboard && navigator.clipboard.write) {
+        copyImageBtn.textContent = 'Tabelle kopieren 📋';
+    } else {
+        copyImageBtn.textContent = 'Tabelle speichern ⬇️';
     }
 
     // LocalStorage helpers
@@ -28,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = {
             billAmount: state.billAmount,
             neighborKwh: state.neighborKwh,
-            csvText: state.files.user,
+            csvText: state.csvText || null,
             csvFileName: state.csvFileName || null,
             selectedYear: selectYear.value,
             selectedQuarter: selectQuarter.value
@@ -52,12 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // State
     const state = {
-        files: {
-            user: null
-        },
+        hasFile: false,
+        parsedUser: [],   // parsed once on file load
+        csvText: null,    // raw CSV text for localStorage persistence
+        csvFileName: null,
         neighborKwh: 0,
-        billAmount: 0,
-        csvFileName: null
+        billAmount: 0
     };
 
     // Event Listeners
@@ -75,36 +83,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     selectYear.addEventListener('change', () => {
         saveState();
-        if (state.files.user) calculateAndRender();
+        if (state.hasFile) calculateAndRender();
     });
     selectQuarter.addEventListener('change', () => {
         saveState();
-        if (state.files.user) calculateAndRender();
+        if (state.hasFile) calculateAndRender();
     });
 
-    fileUser.addEventListener('change', (e) => handleFileUpload(e));
+    fileUser.addEventListener('change', handleFileUpload);
     calcBtn.addEventListener('click', calculateAndRender);
 
     copyImageBtn.addEventListener('click', async () => {
-        const originalText = copyImageBtn.innerText;
-        copyImageBtn.innerText = 'Wird erstellt...';
+        const originalText = copyImageBtn.textContent;
+        copyImageBtn.textContent = 'Wird erstellt...';
 
         try {
             const canvas = await html2canvas(captureTarget, {
-                scale: 2,
+                scale: window.devicePixelRatio || 2,
                 backgroundColor: null,
                 useCORS: true
             });
 
-            canvas.toBlob(async blob => {
+            canvas.toBlob(async (blob) => {
                 if (!blob) {
                     alert('Canvas Leer Fehler');
-                    copyImageBtn.innerText = originalText;
+                    copyImageBtn.textContent = originalText;
                     return;
                 }
 
                 // Strategy 1: Native Share (Best for Mobile)
-                const file = new File([blob], "stromabrechnung.png", { type: "image/png" });
+                const file = new File([blob], 'stromabrechnung.png', { type: 'image/png' });
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
                         await navigator.share({
@@ -112,19 +120,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             title: 'Stromabrechnung',
                             text: 'Hier ist die Abrechnung.'
                         });
-                        copyImageBtn.innerText = 'Geteilt! ✅';
-                        setTimeout(() => copyImageBtn.innerText = originalText, 2000);
+                        copyImageBtn.textContent = 'Geteilt! ✅';
+                        setTimeout(() => copyImageBtn.textContent = originalText, 2000);
                         return;
                     } catch (err) {
-                        console.log('Share cancelled/failed', err);
-                        // User might have cancelled, so we stop here or fall through? 
-                        // Usually if cancelled, we don't want to force download.
-                        if (err.name !== 'AbortError') {
-                            // Only fall through if it wasn't a user cancel
-                        } else {
-                            copyImageBtn.innerText = originalText;
+                        if (err.name === 'AbortError') {
+                            copyImageBtn.textContent = originalText;
                             return;
                         }
+                        // Non-abort error: fall through to clipboard
+                        console.warn('Share failed, trying clipboard', err);
                     }
                 }
 
@@ -132,8 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     const item = new ClipboardItem({ 'image/png': blob });
                     await navigator.clipboard.write([item]);
-                    copyImageBtn.innerText = 'Kopiert! ✅';
-                    setTimeout(() => copyImageBtn.innerText = originalText, 2000);
+                    copyImageBtn.textContent = 'Kopiert! ✅';
+                    setTimeout(() => copyImageBtn.textContent = originalText, 2000);
                     return;
                 } catch (err) {
                     console.warn('Clipboard failed', err);
@@ -145,18 +150,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     link.download = 'stromabrechnung.png';
                     link.href = canvas.toDataURL('image/png');
                     link.click();
-                    copyImageBtn.innerText = 'Gespeichert! ⬇️';
-                    setTimeout(() => copyImageBtn.innerText = originalText, 2000);
+                    copyImageBtn.textContent = 'Gespeichert! ⬇️';
+                    setTimeout(() => copyImageBtn.textContent = originalText, 2000);
                 } catch (errDownload) {
                     console.error('Download failed', errDownload);
                     alert('Bild konnte leider nicht automatisch exportiert werden. Bitte Screenshot machen.');
-                    copyImageBtn.innerText = originalText;
+                    copyImageBtn.textContent = originalText;
                 }
             });
 
         } catch (err) {
             console.error(err);
-            copyImageBtn.innerText = originalText;
+            copyImageBtn.textContent = originalText;
             alert('Fehler beim Erstellen des Bildes: ' + err.message);
         }
     });
@@ -165,12 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = event.target.files[0];
         if (!file) return;
 
-        labelUser.innerText = file.name;
+        labelUser.textContent = file.name;
         state.csvFileName = file.name;
 
         const reader = new FileReader();
         reader.onload = function (e) {
-            state.files.user = e.target.result;
+            state.csvText = e.target.result;
+            state.parsedUser = parseCSV(e.target.result);
+            state.hasFile = true;
             saveState();
             checkReady();
         };
@@ -178,20 +185,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function checkReady() {
-        // Require User File and at least one other input (usually both, but let's be flexible-ish)
-        // Actually, logic requires both parts to split.
-        if (state.files.user && state.neighborKwh > 0 && state.billAmount > 0) {
-            calcBtn.removeAttribute('disabled');
-        } else {
-            // Optional: strict check
-            if (state.files.user && state.neighborKwh > 0) {
-                calcBtn.removeAttribute('disabled');
-            }
-        }
+        const ready = state.hasFile && state.neighborKwh > 0 && state.billAmount > 0;
+        calcBtn.toggleAttribute('disabled', !ready);
     }
 
     function parseCSV(csvText) {
-        // Simple manual parsing
         const lines = csvText.split('\n');
         const data = [];
 
@@ -204,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (headerIndex === -1) {
-            console.error("CSV Headers not found");
+            console.error('CSV Headers not found');
             return [];
         }
 
@@ -235,36 +233,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getQuarter(date) {
         const month = date.getMonth() + 1;
-        const year = date.getFullYear();
         const q = Math.ceil(month / 3);
-        return `${year} Q${q}`;
+        return `${date.getFullYear()} Q${q}`;
     }
 
     function calculateAndRender() {
-        const dataUser = parseCSV(state.files.user);
+        const dataUser = state.parsedUser;
 
         if (dataUser.length === 0) {
             alert('Fehler beim Lesen der CSV Datei. Bitte Format prüfen.');
             return;
         }
 
-        // Get Selection
         const selectedYear = selectYear.value;
-        const selectedQuarter = selectQuarter.value; // "Q1", "Q2"...
+        const selectedQuarter = selectQuarter.value;
         const targetToken = `${selectedYear} ${selectedQuarter}`;
 
-        // Filter User Data for that Quarter
+        // Filter for selected quarter
         const filteredUser = dataUser.filter(d => getQuarter(d.date) === targetToken);
 
-        // Sum User kWh
+        // Warn if no sessions found for this quarter
+        if (filteredUser.length === 0) {
+            alert(`Keine Ladesitzungen für ${targetToken} gefunden. Bitte Quartal oder Datei prüfen.`);
+            return;
+        }
+
         const sumUser = filteredUser.reduce((acc, curr) => acc + curr.kwh, 0);
-
-        // Neighbor kWh (Manual Input)
         const sumNeighbor = state.neighborKwh;
-
         const totalKwh = sumUser + sumNeighbor;
 
-        // Calculate Cost
         const totalBill = state.billAmount;
         let costUser = 0;
         let costNeighbor = 0;
@@ -274,35 +271,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (totalKwh > 0) {
             percentUser = (sumUser / totalKwh) * 100;
             percentNeighbor = (sumNeighbor / totalKwh) * 100;
-
-            // Adjust costs to strictly sum to totalBill if needed, 
-            // but simple proportion is usually fine. 
-            // Better: CostUser + CostNeighbor should = TotalBill.
-            // Let's calc neighbor first as he is the recipient of the bill part usually? 
-            // Actually usually "I paid the bill, neighbor pays me back".
             costNeighbor = (sumNeighbor / totalKwh) * totalBill;
-            costUser = totalBill - costNeighbor; // Ensure fit
+            costUser = totalBill - costNeighbor;
         }
 
-        // Render Results
-        document.getElementById('quarter-display').innerText = targetToken;
+        // Render Results – textContent (no layout reflow)
+        document.getElementById('quarter-display').textContent = targetToken;
+        document.getElementById('total-kwh-result').textContent = totalKwh.toFixed(1);
+        document.getElementById('total-cost').textContent = `CHF ${totalBill.toFixed(2)}`;
+        document.getElementById('user-kwh-result').textContent = sumUser.toFixed(1);
+        document.getElementById('user-percent').textContent = `${percentUser.toFixed(1)}%`;
+        document.getElementById('user-cost').textContent = `CHF ${costUser.toFixed(2)}`;
+        document.getElementById('neighbor-kwh-result').textContent = sumNeighbor.toFixed(1);
+        document.getElementById('neighbor-percent').textContent = `${percentNeighbor.toFixed(1)}%`;
+        document.getElementById('neighbor-cost').textContent = `CHF ${costNeighbor.toFixed(2)}`;
 
-        document.getElementById('total-kwh-result').innerText = totalKwh.toFixed(0);
-        document.getElementById('total-cost').innerText = `CHF ${totalBill.toFixed(2)}`;
-
-        document.getElementById('user-kwh-result').innerText = sumUser.toFixed(0);
-        document.getElementById('user-percent').innerText = `${percentUser.toFixed(1)}%`;
-        document.getElementById('user-cost').innerText = `CHF ${costUser.toFixed(2)}`;
-
-        document.getElementById('neighbor-kwh-result').innerText = sumNeighbor.toFixed(0);
-        document.getElementById('neighbor-percent').innerText = `${percentNeighbor.toFixed(1)}%`;
-        document.getElementById('neighbor-cost').innerText = `CHF ${costNeighbor.toFixed(2)}`;
-
-
-
-        // Show Results
-        resultSection.classList.remove('hidden');
-        resultSection.scrollIntoView({ behavior: 'smooth' });
+        // Only scroll into view on first reveal; subsequent recalcs stay in place
+        if (resultSection.classList.contains('hidden')) {
+            resultSection.classList.remove('hidden');
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        }
     }
 
     // Restore saved state on load
@@ -316,16 +304,14 @@ document.addEventListener('DOMContentLoaded', () => {
             state.neighborKwh = saved.neighborKwh;
             neighborInput.value = saved.neighborKwh;
         }
-        if (saved.selectedYear) {
-            selectYear.value = saved.selectedYear;
-        }
-        if (saved.selectedQuarter) {
-            selectQuarter.value = saved.selectedQuarter;
-        }
+        if (saved.selectedYear) selectYear.value = saved.selectedYear;
+        if (saved.selectedQuarter) selectQuarter.value = saved.selectedQuarter;
         if (saved.csvText) {
-            state.files.user = saved.csvText;
+            state.csvText = saved.csvText;
+            state.parsedUser = parseCSV(saved.csvText);
             state.csvFileName = saved.csvFileName;
-            labelUser.innerText = saved.csvFileName || 'Gespeicherte Datei';
+            state.hasFile = true;
+            labelUser.textContent = saved.csvFileName || 'Gespeicherte Datei';
         }
         checkReady();
     }

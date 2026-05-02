@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EV Charge Splitter</title>
+    <title>ElectroShare</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,8 +33,8 @@
                 </div>
             </div>
 
-            <div class="input-group" style="display: flex; gap: 1rem;">
-                <div style="flex: 1;">
+            <div class="input-row">
+                <div>
                     <label for="select-year">Jahr</label>
                     <div class="currency-input">
                         <select id="select-year" class="modern-select">
@@ -42,7 +42,7 @@
                         </select>
                     </div>
                 </div>
-                <div style="flex: 1;">
+                <div>
                     <label for="select-quarter">Quartal</label>
                     <div class="currency-input">
                         <select id="select-quarter" class="modern-select">
@@ -65,7 +65,7 @@
             </div>
 
             <div class="input-group">
-                <label for="neighbor-kwh">Krieg Verbrauch (kWh)</label>
+                <label for="neighbor-kwh">Nachbar Verbrauch (kWh)</label>
                 <div class="currency-input">
                     <span>⚡</span>
                     <input type="number" id="neighbor-kwh" placeholder="0" step="1">
@@ -115,9 +115,9 @@
                 </div>
             </div>
 
-            <div class="action-buttons" style="margin-top: 1rem;">
+            <div class="action-buttons">
                 <button id="copy-image-btn" class="secondary-btn">
-                    Tabelle als Bild kopieren 📸
+                    Tabelle kopieren 📋
                 </button>
             </div>
         </section>
